@@ -9,6 +9,7 @@ static volatile int i = 0;
 static alarm_id_t inc_alm;
 static alarm_id_t dec_alm;
 
+
 void init_gpio() {
     // uint32_t pinMask = 0x00 || 0x01 << BUTTON_A || 0x01 << BUTTON_B; 
     // gpio_init_mask(pinMask);
@@ -25,11 +26,11 @@ void init_gpio() {
     gpio_set_dir(BUTTON_B, GPIO_IN); // Configura o pino como entrada
     gpio_pull_up(BUTTON_B);
 
-    gpio_init(13);
-    gpio_set_dir(13, GPIO_OUT);
+    gpio_init(LED_R);
+    gpio_set_dir(LED_R, GPIO_OUT);
 
-    gpio_init(12);
-    gpio_set_dir(12, GPIO_OUT);
+    // gpio_init(12);
+    // gpio_set_dir(12, GPIO_OUT);
 
     gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
     gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
@@ -50,14 +51,14 @@ int64_t decrement(alarm_id_t id, void *user_data) {
 static void gpio_callback(uint gpio, uint32_t events) {
     if(gpio == BUTTON_A){
         if(events & 0x4)        //FALL EDGE
-            dec_alm = add_alarm_in_ms(50, decrement, NULL, false);
+            dec_alm = add_alarm_in_ms(DEBOUNCE_MS, increment, NULL, false);
         else if(events & 0x8)   // RISE EDGE
             cancel_alarm(dec_alm); 
     }
 
     else if (gpio == BUTTON_B){
         if(events & 0x4) 
-            inc_alm = add_alarm_in_ms(50, increment, NULL, false);
+            inc_alm = add_alarm_in_ms(DEBOUNCE_MS, decrement, NULL, false);
 
         else if(events & 0x8)   // RISE EDGE
             cancel_alarm(inc_alm);
@@ -74,6 +75,7 @@ int main()
 
     init_gpio();
     initNeoPixel();
+    bool led = true;
 
     // struct repeating_timer timer;
     // add_repeating_timer_ms(1000, repeat_callback, NULL, &timer);
@@ -117,5 +119,8 @@ int main()
                 break;
         }
         sleep_ms(100);
+
+        led = !led;
+        gpio_put(LED_R, led);
     }
 }
