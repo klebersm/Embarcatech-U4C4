@@ -24,7 +24,7 @@ void renderMatrix(bool letra[MATRIX_LEN][MATRIX_LEN]) {
     for(int j = MATRIX_LEN - 1; j >= 0; j--) {
       uint8_t col = j;
       if(i % 2 != 0) col = MATRIX_LEN - 1 - j;
-      if(letra[i][col]) put_pixel(urgb_u32(60, 0, 0));
+      if(letra[i][col]) put_pixel(urgb_u32(255, 0, 0));
       else put_pixel(urgb_u32(0, 0, 0));
     }
   }
